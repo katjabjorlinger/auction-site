@@ -1,0 +1,45 @@
+<!-- Logga in -->
+<!-- Ansvarar för inloggningssidan där admin och användare loggar in -->
+{% extends 'baselayout.html' %}
+
+{% block title %}
+    Logga in
+{% endblock %}
+
+{% block content %}
+<!-- Tillbaka till alla föremål --> 
+<p><a href="{{ url_for('auction_bp.get_all_items') }}">Till alla föremål</a></p>
+                {% if loginmessage %}
+                    <div class="alert alert-warning mt-3" role="alert">
+                        {{ loginmessage }}
+                    </div>
+                {% endif %}
+<!-- Formulär för inlogg -->
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="p-4 bg-light rounded-3 shadow-sm">
+                <h1 class="text-center mb-4">Logga in</h1>
+                <form method="POST" action="{{ url_for('auction_bp.login') }}">
+                    {{ form.hidden_tag() }}
+                    <!-- Användarnamn -->
+                    <div class="mb-3">
+                        <label for="username" class="form-label">{{ form.username.label }}</label>
+                        {{ form.username(class="form-control", placeholder="admin@auktion.nu", required=true) }}
+                    </div>
+                    <!-- Lösenord -->
+                    <div class="mb-3">
+                        <label for="password" class="form-label">{{ form.password.label }}</label>
+                        {{ form.password(class="form-control", placeholder="1234", required=true) }}
+                    </div>
+                    <!-- Submit-knapp -->
+                    <div class="d-grid">
+                        {{ form.submit(class="btn btn-primary btn-lg", value="Logga in") }}
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

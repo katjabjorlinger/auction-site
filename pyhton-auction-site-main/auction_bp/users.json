@@ -1,0 +1,28 @@
+[
+    {
+      "id": "1",
+      "username": "h23lkarl@du.se",
+      "password": "123",
+      "role":"user"
+    },
+    {
+      "id": "2",
+      "username": "h23katbj@du.se",
+      "password": "456",
+      "role":"superuser"
+    },
+    {
+      "id": "3",
+      "username": "admin@auktion.nu",
+      "password": "1234",
+      "role":"admin"
+    },
+
+      {
+      "id": "4",
+      "username": "h23cecbe@du.se",
+      "password": "1234",
+      "role":"admin"
+    }
+
+  ]

@@ -1,0 +1,95 @@
+<!-- Lägg till objekt -->
+<!-- Endast tillgänglig för admin -->
+
+{% extends 'baselayout.html' %}
+{% block title %}
+    Lägg till föremål
+{% endblock %}
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="p-4 bg-light rounded-3 shadow-sm">
+                <h1 class="text-center mb-4">Skapa auktion</h1>
+                <form action="{{ url_for('auction_bp.add_item') }}" method="POST">
+
+                    <!-- Genererat ID -->
+                    <div class="mb-3">
+                        <label for="id" class="form-label">ID</label>
+                        <input type="text" class="form-control" id="id" name="id" value="{{ item_id }}" readonly required>
+                    </div>
+
+                    <!-- Titel -->
+                    <div class="mb-3">
+                        <label for="titel" class="form-label">Titel</label>
+                        <input type="text" class="form-control" id="titel" name="titel" required>
+                    </div>
+
+                    <!-- Beskrivning -->
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Beskrivning</label>
+                        <textarea class="form-control" id="description" name="description" rows="3" required></textarea>
+                    </div>
+
+                    <!-- Säljare -->
+                    <div class="mb-3">
+                        <label for="seller" class="form-label">Säljare</label>
+                        <input type="text" class="form-control" id="seller" name="seller" required>
+                    </div>
+
+                    <!-- Utropspris -->
+                    <div class="mb-3">
+                        <label for="price" class="form-label">Utropspris</label>
+                        <input type="number" class="form-control" id="price" name="price" step="1" required>
+                    </div>
+
+                    <!-- Bild URL -->
+                    <div class="mb-3">
+                        <label for="image" class="form-label">Bild URL</label>
+                        <input type="url" class="form-control" id="image" name="image" required>
+                    </div>
+
+                     <!-- Startdatum för auktion -->
+                    <div class="mb-3">
+                        <label for="start_time" class="form-label">Startdatum:</label>
+                        <div class="input-group">
+                            <input type="datetime-local" class="form-control" id="start_time" name="start_time" required>
+                            <span class="input-group-text">
+                                <i class="bi bi-calendar"></i>
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Slutdatum för auktion -->
+                        <div class="mb-3">
+                            <label for="end_time" class="form-label">Slutdatum:</label>
+                            <div class="input-group">
+                                <input type="datetime-local" class="form-control" id="end_time" name="end_time" required>
+                                <span class="input-group-text">
+                                    <i class="bi bi-calendar"></i>
+                                </span>
+                            </div>
+                        </div>
+                    <!-- Kategori -->
+                        <div class="mb-3">
+                             <label for="category">Kategori:</label>
+                             <select name="category_id" class="form-select" required>
+                                 <option value="" disabled selected>Välj en kategori</option>
+                                 {% for category in categories %}
+                                     <option value="{{ category[0] }}">{{ category[1] }}</option>
+                                 {% endfor %}
+                             </select>
+                        </div>
+
+
+                    <!-- Knappar -->
+                    <div class="d-grid gap-2 mt-4">
+                        <button type="submit" class="btn btn-primary btn-lg">Spara</button>
+                        <a href="{{ url_for('auction_bp.get_all_items') }}" class="btn btn-secondary btn-lg">Avbryt</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

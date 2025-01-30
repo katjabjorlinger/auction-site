@@ -1,0 +1,170 @@
+<!-- Auktionssida -->
+<!-- Här visas alla auktioner -->
+<!-- Sortering, kategorier, sök -->
+
+{% extends 'baselayout.html' %}
+
+{% block title %}
+Alla Auktioner
+{% endblock %}
+
+{% block content %}
+
+
+    <div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 bg-light p-4 shadow-sm">
+            <h5 class="mb-4">Sök och filtrera</h5>
+            <!-- Sök -->
+            <form method="GET" action="{{ url_for('auction_bp.get_all_items') }}" class="mb-4">
+                <label for="search" class="form-label"><strong>Sök efter auktioner:</strong></label>
+                <input type="text" name="search" class="form-control mb-2" placeholder="Sök..." value="{{ request.args.get('search', '') }}">
+                <button class="btn btn-outline-primary w-100" type="submit">Sök</button>
+            </form>
+
+            <!-- Kategori -->
+            <form method="GET" action="{{ url_for('auction_bp.get_all_items') }}">
+                <label for="category" class="form-label"><strong>Kategori</strong></label>
+                    <select name="category" id="category" class="form-select mb-2" onchange="this.form.submit()">
+                        <option value="">Alla kategorier</option>
+                        {% for cat in categories %}
+                            <option value="{{ cat }}" {% if cat == selected_category %}selected{% endif %}>{{ cat }}</option>
+                        {% endfor %}
+                    </select>
+            </form>
+
+            <!-- Sortera -->
+            <form id="sortForm" action="{{ url_for('auction_bp.get_all_items') }}" method="GET" class="mb-4">
+                <label for="sort" class="form-label"><strong>Sortera:</strong></label>
+                <select name="sort" id="sort" class="form-select mb-2" onchange="document.getElementById('sortForm').submit();">
+                    <option value="" {% if not request.args.get('sort') %}selected{% endif %}>Välj sortering</option>
+                    <option value="titel" {% if request.args.get('sort') == 'titel' %}selected{% endif %}>Titel (A-Z)</option>
+                    <option value="price_asc" {% if request.args.get('sort') == 'price_asc' %}selected{% endif %}>Lägsta pris</option>
+                    <option value="price_desc" {% if request.args.get('sort') == 'price_desc' %}selected{% endif %}>Högsta pris</option>
+                    <option value="auction_end" {% if request.args.get('sort') == 'auction_end' %}selected{% endif %}>Slutdatum</option>
+                    <option value="ongoing" {% if request.args.get('sort') == 'ongoing' %}selected{% endif %}>Pågående auktioner</option>
+                    <option value="completed" {% if request.args.get('sort') =='completed' %}selected{% endif %}>Avslutade auktioner</option>
+                    <option value="upcoming" {% if request.args.get('sort') == 'upcoming' %}selected{% endif %}>Kommande auktioner</option>
+                </select>
+            </form>
+
+            <!-- Lägg till nytt föremål -->
+            <!-- Endast tillgänglig för admin -->
+            <!-- Annars skickas man till login -->
+            <h5 class="mb-4">Skapa auktion</h5>
+            {% if current_user.is_authenticated %}
+            <a href="{{ url_for('auction_bp.add_item_form') }}" class="btn btn-outline-success w-100">Lägg till föremål</a>
+            {% else %}
+            <a href="{{ url_for('auction_bp.login') }}" class="btn btn-outline-secondary w-100">Logga in för att lägga till</a>
+            {% endif %}
+        </div>
+
+
+        <!-- Alla auktioner -->
+        <div class="col-md-9">
+            {% if auctions %}
+            <div class="row row-cols-1 row-cols-sm-1 row-cols-md-2 row-cols-lg-3 g-4">
+                {% for item in auctions %}
+                <div class="col">
+                    <div class="card h-100 shadow-sm border-0 rounded-4 overflow-hidden">
+                        <!-- Nedräkning till auktionens slutdatum -->
+                        <!-- Eller information auktionens status -->
+                        <p id="countdown-{{ item.id }}" class="fs-6 text-center text-white bg-dark px-2 py-1 rounded position-absolute top-0 end-0 m-2">
+                            Laddar...
+                        </p>
+                        <img src="{{ item.image }}" class="card-img-top border border-white img-fluid rounded mb-3" alt="{{ item.titel }}" style="max-height: auto; object-fit: cover;">
+
+                        <div class="card-body text-center">
+
+                            <!-- Titel -->
+                            <h6 class="card-title">{{ item.titel }}</h6>
+
+                            <!-- Utropspris eller högsta bud -->
+                            {% if item.highest_bid %}
+                                <p class="card-text mb-1">
+                                    <span class="fw-bold">Aktuellt bud</span> {{ item.highest_bid |int }} SEK
+                                </p>
+                                <p class="card-text mb-1">
+                                    <span>Utropspris</span> {{ item.price | int }} SEK
+                                </p>
+                                {% else %}
+                                     <p class=" card-text mb-1">
+                                      <span>Utropspris</span> {{ item.price |int }} SEK
+                                     </p>
+                                {% endif %}
+                            </div>
+                            <div class="card-footer text-center border-0">
+                                <a href="{{ url_for('auction_bp.get_item_by_id', id=item.id) }}" class="btn btn-sm btn-outline-primary">Läs mer</a>
+                            </div>
+                       </div>
+                  </div>
+                  {% endfor %}
+            </div>
+            {% else %}
+            <!-- Detta visas om ingen auktion finns i kategorin -->
+            <p class="text-muted p-2"> Inga auktioner.</p>
+            {% endif %}
+        </div>
+<!-- Nedräkning till auktionens slutdatum -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const auctions = [
+            {% for item in auctions %}
+                {
+                    id: "{{ item.id }}",
+                    startTime: "{{ item.start_time }}",
+                    endTime: "{{ item.end_time }}"
+                }{% if not loop.last %},{% endif %}
+            {% endfor %}
+        ];
+
+        auctions.forEach(auction => {
+            const countdownElement = document.getElementById(`countdown-${auction.id}`);
+            const startCountDownDate = new Date(auction.startTime.replace(' ', 'T')).getTime();
+            const endCountDownDate = new Date(auction.endTime.replace(' ', 'T')).getTime();
+
+            const now = Date.now();
+
+            if (now < startCountDownDate) {
+                countdownElement.innerHTML = `Startar: ${auction.startTime}`;
+            } else if (now > endCountDownDate) {
+                countdownElement.innerHTML = "Auktionen är avslutad!";
+                countdownElement.classList.add('text-danger');
+            } else {
+                const updateCountDown = () => {
+                    const now = Date.now();
+                    const distance = endCountDownDate - now;
+
+                    if (distance <= 0) {
+                        clearInterval(interval);
+                        countdownElement.innerHTML = "Auktionen är avslutad!";
+                        countdownElement.classList.add('text-danger');
+                        return;
+                    }
+
+                    const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                    const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                    const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+                    countdownElement.innerHTML = `${days}d ${hours}h ${minutes}m ${seconds}s`;
+
+
+                    if (distance < 3600000) { // Mindre än 1 timme kvar (3600000 ms)
+                    countdownElement.innerHTML = `${hours}h ${minutes}m ${seconds}s`;
+                    } else if (distance < 86400000) { // Mindre än 1 dag kvar (86400000 ms)
+                    countdownElement.innerHTML = `${hours}h ${minutes}m`;
+                    } else {
+                    countdownElement.innerHTML = `${days}d ${hours}h`;
+                    }
+                };
+
+                const interval = setInterval(updateCountDown, 1000);
+                updateCountDown();
+            }
+        });
+    });
+</script>
+
+{% endblock %}

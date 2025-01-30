@@ -1,0 +1,85 @@
+<!-- Ändra objekt -->
+<!-- Endast tillgänglig för admin -->
+{% extends 'baselayout.html' %}
+
+{% block title %}
+    Redigera föremål {{ item.id }} {{ item.title }}
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="text-center mb-4">Redigera föremål</h1>
+
+    <form action="{{ url_for('auction_bp.update_item') }}" method="POST" class="p-4 bg-light rounded-3 shadow-sm">
+
+         <!-- ID (readonly) -->
+        <div class="mb-3">
+            <label for="id" class="form-label">ID</label>
+            <input type="text" class="form-control" id="id" name="id" value="{{ item.id }}" readonly>
+        </div>
+
+
+        <!-- Titel -->
+        <div class="mb-3">
+            <label for="titel" class="form-label">Titel</label>
+            <input type="text" class="form-control" id="titel" name="titel" value="{{ item.titel }}" required>
+        </div>
+
+        <!-- Beskrivning -->
+        <div class="mb-3">
+            <label for="description" class="form-label">Beskrivning</label>
+            <textarea class="form-control" id="description" name="description" rows="3" required>{{ item.description }}</textarea>
+        </div>
+
+        <!-- Säljare -->
+        <div class="mb-3">
+            <label for="seller" class="form-label">Säljare</label>
+            <input type="text" class="form-control" id="seller" name="seller" value="{{ item.seller }}" required>
+        </div>
+
+        <!-- Pris -->
+        <div class="mb-3">
+            <label for="price" class="form-label">Pris</label>
+            <input type="number" class="form-control" id="price" name="price" value="{{ item.price }}" required>
+        </div>
+
+        <!-- Bild URL -->
+        <div class="mb-3">
+            <label for="image" class="form-label">Bild URL</label>
+            <input type="url" class="form-control" id="image" name="image" value="{{ item.image }}" required>
+        </div>
+
+                <!-- Startdatum för auktion -->
+        <div class="mb-3">
+            <label for="start_time" class="form-label">Startdatum för auktion (YYYY-MM-DD HH:MM:SS)</label>
+            <input type="datetime-local" class="form-control" id="start_time" name="start_time" value="{{ item.start_time }}" required>
+        </div>
+
+
+        <!-- Slutdatum för auktion -->
+        <div class="mb-3">
+            <label for="end_time" class="form-label">Slutdatum för auktion (YYYY-MM-DD HH:MM:SS)</label>
+            <input type="datetime-local" class="form-control" id="end_time" name="end_time" value="{{ item.end_time }}" required>
+        </div>
+
+        <!-- Kategori -->
+        <div class="mb-3">
+            <label for="category">Kategori:</label>
+            <select name="category_id" class="form-select" required>
+                <option value="" disabled>Välj en kategori</option>
+                {% for category in categories %}
+                    <option value="{{ category[0] }}" {% if category[0] == item.category_id %}selected{% endif %}>
+                        {{ category[1] }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- Knappar -->
+        <div class="d-grid gap-2 mt-4">
+            <button type="submit" class="btn btn-primary btn-lg">Spara</button>
+            <a href="{{ url_for('auction_bp.get_item_by_id', id=item.id) }}" class="btn btn-secondary btn-lg">Avbryt</a>
+        </div>
+    </form>
+</div>
+{% endblock %}
